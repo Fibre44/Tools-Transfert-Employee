@@ -1,0 +1,5 @@
+@mixin laptop-only {
+    @media all and (max-width : 1900px) and (min-width: 1024px){
+        @content;
+    }   
+}

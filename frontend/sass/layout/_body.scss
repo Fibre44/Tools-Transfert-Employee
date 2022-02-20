@@ -1,0 +1,9 @@
+body{
+    margin: 0;
+    padding: 0;
+    width: 425px;
+    height: 882px;
+    @include laptop-only {
+        width: 1600px;
+    }
+}

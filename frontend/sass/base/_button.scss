@@ -1,0 +1,15 @@
+.button {
+
+    width: 170px;
+    height: 40px;
+    border-radius: 10px;
+    background-color: $background-color;
+
+    &__validation{
+        background-color: green;
+    }
+
+    &__error {
+        background-color: red;
+    }
+}
