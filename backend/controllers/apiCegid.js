@@ -1,4 +1,5 @@
 const https = require('https');
+const { stringify } = require('querystring');
 
 exports.getDataAPI = (req, res , next)  =>{
 
@@ -49,11 +50,14 @@ exports.postApi = (req, res , next ) =>{
     
       
     }
-    const reqPost = https.request(req.body.url,options, res => {
-      console.log(`statusCode: ${res.statusCode}`)
-      res.on('data', d => {
+    const reqPost = https.request(req.body.url,options, resPost => {
+      console.log(`statusCode: ${resPost.statusCode}`)
+    
+      resPost.on('data', d => {
         process.stdout.write(d)
       })
+      res.status(resPost.statusCode).json({response : resPost.statusMessage, body : resPost.body});
+
     })
     
     reqPost.on('error', error => {
@@ -61,8 +65,11 @@ exports.postApi = (req, res , next ) =>{
     })
     
     reqPost.write(dataPost)
+    
 
     reqPost.end()
+
+    
     
 }
 
@@ -83,9 +90,9 @@ exports.putApi = (req, res , next ) =>{
     
       
     }
-    const reqPost = https.request(req.body.url,options, res => {
-      console.log(`statusCode: ${res.statusCode}`)
-      res.on('data', d => {
+    const reqPost = https.request(req.body.url,options, resPost => {
+      console.log(`statusCode: ${resPost.statusCode}`)
+      resPost.on('data', d => {
         process.stdout.write(d)
       })
     })
@@ -97,6 +104,8 @@ exports.putApi = (req, res , next ) =>{
     reqPost.write(dataPost)
 
     reqPost.end()
+
+
     
 }
 

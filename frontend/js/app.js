@@ -1,6 +1,29 @@
 const urlServer = "http://localhost:3000"
 const button = document.getElementsByClassName("button")
 
+
+function startSession (){
+
+  button[0].addEventListener("click", () => {
+
+    fetch (urlServer+"/session")
+    .then((res)=>{
+      if (res.ok) {
+        return res.json();
+    }   
+    })
+    .then((session)=>{
+
+      sessionStorage.setItem("session",session.idSession);
+
+      document.getElementsByClassName("header__session")[0].textContent = "Session en cours "+session.idSession;
+      
+    })
+  })
+}
+
+startSession()
+
 /**
  * return les éléments de connexion
  */
@@ -35,32 +58,22 @@ function getFolderOut (){
 
 function connexion (){
 
-    button[0].addEventListener("click", function(event) {
+    button[1].addEventListener("click", function(event) {
 
         event.preventDefault();
 
         getData("https://y2cbrh-ondemand.cegid.com//CegidRHWebApi/v1/Folder/ListFolders")
 
-        .then( (folders) => {
+        .then( (dataFolders) => {
 
-          console.log(folders);
-          writeFolder(folders)
+          writeFolders("foldersIn",dataFolders)
+          buttonFoldersIn();
         
-          buttonValidation(this)
-
         })
 
         .catch((error) => {
 
           console.error(error)
-        })
-      
-    
-        .catch ((error) => {
-
-          console.error(error);
-
-          
         })
 
     })
@@ -69,37 +82,45 @@ function connexion (){
 
 connexion();
 
-function stepEmployees (){
+/**
+ * 
+ * @param {string} description indiquer la valeur à écrire sur le bouton
+ * @param {string} stepId Id de la liste déroulante
+ */
 
-  button[2].addEventListener("click",function () {
-    getData("https://y2cbrh-ondemand.cegid.com//CegidRHWebApi/v1/Employee/OData/Identity?folderId="+getFolderIn())
-    .then((employees) => {
+function writeSelect(description,stepId){
 
-      writeEmployees(employees);
-    })
-    .catch((error) => {
-      console.error(error);
-    })
+  const divSelect = document.getElementsByClassName("conteneur__select");
+  const divStep = document.createElement("div");
+  divStep.classList.add("conteneur__select__items");
+  divSelect[0].appendChild(divStep);
+  const select = document.createElement("select");
+  const button = document.createElement("button");
+  button.setAttribute("id","button__"+stepId);
+  button.textContent = description
+  select.setAttribute("id",stepId);
+  divStep.appendChild(select)
+  divStep.appendChild(button);
+
+}
+/**
+ * 
+ * @param {JSON} data 
+ */
+
+function buttonFolders (){
+
+  const button = document.getElementById("button__foldersIn");
+  button.addEventListener("click", () => {
+
+    const folderIn = document.getElementById("foldersIn").value;
+    const folderInRename = renameFolder(folderIn);
+    sessionStorage.setItem("folderIn",folderInRename);
+
+
   })
 }
 
-stepEmployees();
-
-function stepEstablishments(){
-
-  button[3].addEventListener("click",function () {
-    getData("https://y2cbrh-ondemand.cegid.com//CegidRHWebApi/v1/Establishment/OData/Establishment?folderId="+getFolderOut())
-    .then((establishments) => {
-
-      writeEstablishments(establishments);
-    })
-    .catch((error) => {
-      console.error(error);
-    })
-  })
-}
-
-stepEstablishments();
 /**
  * 
  * @param {string} indiquer l'url qu'on souhaite contacter  
@@ -137,6 +158,7 @@ function getData(patch){
          })
          
          .catch(function(err){
+           console.error("Le serveur ne répond pas ",err)
            reject(res.status);
          }); 
         
@@ -145,6 +167,7 @@ function getData(patch){
 }
 
 /**
+ * Voir pour déplacer la logique sur le backend
  * Fonction pour créer un salarié
  * Etape 1 création d'un objet avec les éléments de la séléction
  * Etape 2 getIdentity pour obtenir les informations
@@ -156,71 +179,6 @@ function getData(patch){
  * @returns 
  */
 
-function migration(){
-  button[5].addEventListener("click", function(){
-    options = migrationOptions();
-
-    console.log(options);
-
-    getData("https://y2cbrh-ondemand.cegid.com//CegidRHWebApi/v1/Employee/OData/Identity?folderId="+getFolderIn())
-    .then((employees) => {
-
-      //récupération du matricule
-      const employeesJSON = JSON.parse(employees);
-      const matriculeSearch =  employeesJSON.Items.find(employees => employees.EmployeeId == options.matricule);
-      console.log(matriculeSearch);
-
-      return matriculeSearch
-
-
-    })
-    .catch((error) => {
-      console.error("Erreur lors de la recherche du salarié",error);
-    })
-    .then((matricule)=> {
-      const newEmployee = createEmployee(matricule,options.establishment,options.date)
-      console.log(newEmployee);
-    })
-    .catch((error) => {
-      console.error(error);
-    })
-  })
-  
-}
-
-migration();
-
-/**
- * 
- * @param {JSON} dataFolders fournir la liste des dossiers
- */
-
-function writeFolder(dataFolders){
-
-  console.log(dataFolders);
-
-  const dataFoldersJSON = JSON.parse(dataFolders);
-  const folderIn = document.getElementById("folderIn")
-  const folderOut = document.getElementById("folderOut")
-
-  for (folder of dataFoldersJSON){
-
-    let option = document.createElement("option");
-
-    option.setAttribute("value", folder.FolderId);
-    option.textContent = folder.FolderId;
-
-    folderIn.appendChild(option);
-  }
-  for (folder of dataFoldersJSON){
-
-    let option = document.createElement("option");
-
-    option.setAttribute("value", folder.FolderId);
-    option.textContent = folder.FolderId;
-    folderOut.appendChild(option);
-  }
-}
 
 /**
  * 
@@ -277,23 +235,19 @@ function renameFolder(folder){
 
 }
 
-function buttonValidation(localisation){
-
-  localisation.classList.add("button__validation")
-  localisation.disabled = true;
-}
 
 
-
-function postEmployee (){
+function postEmployee (patch,data){
 
 
   paramConnexion = {
     login : getCredentials(),
     url : patch,
+    employee : data
   }
 
-    fetch(urlServer+"/apiCegid/post",{
+    return new Promise ((resolve, reject) => {
+      fetch(urlServer+"/apiCegid/post",{
       method: "POST",
       headers:{
         'Accept':'application/json',
@@ -305,7 +259,7 @@ function postEmployee (){
      })
      .then (function (res){
        if (res.ok){
-         return(res.json());
+         resolve(res.json());
        }    
      })
 
@@ -313,7 +267,7 @@ function postEmployee (){
      .catch(function(err){
        res.status;
      }); 
-    
+    })
 
 }
 
@@ -372,55 +326,59 @@ function getDate(){
 
 /**
  * 
- * @param {JSON} employee 
  * @param {string} code etablissement
  * @param {date} date du transfert
  * @return un employé au format du post
  */
 
-function createEmployee(employee,establishment,date){
+function createEmployee(establishment,date){
+
+  const identity = readSessionStorage("Identity");
+  const civility = readSessionStorage("Civility");
+  const assignment = readSessionStorage("Assignment");
+  const contract = readSessionStorage("Contract")
 
   const newEmployee = {
 
-      Name: employee.Name,
+      Name: identity.Name,
       MaidenName: "",
-      FirstName: employee.FirstName,
-      Civility: employee.Civility,
-      Sex: employee.Gender,
-      Address: employee.Adress1,
-      Address2: employee.Adress2,
-      Address3: employee.Adress3,
-      PostalCode: employee.PostalCode,
-      City: employee.City,
-      Country: employee.Country,
+      FirstName: identity.FirstName,
+      Civility: identity.Civility,
+      Sex: identity.Gender,
+      Address: identity.Adress1,
+      Address2: identity.Adress2,
+      Address3: identity.Adress3,
+      PostalCode: identity.PostCode,
+      City: identity.City,
+      Country: identity.Country,
       Establishment: establishment,
       //Gestion automatique"EmployeeId": "string",
-      StatisticalCode: "",
-      Organization1: "",
-      Organization2: "",
-      Organization3: "",
-      Organization4 : "",
-      FreeSalary1: 0,
-      FreeSalary2: 0,
-      FreeSalary3: 0,
-      FreeSalary4: 0,
-      FreeSalary5: 0,
-      FreeCombo1: "",
-      FreeCombo2: "",
-      FreeCombo3: "",
-      FreeCombo4: "",
-      FreeDate1: "",
-      FreeDate2: "",
-      FreeDate3: "",
-      FreeDate4: "",
+      StatisticalCode: assignment.StatCode,
+      Organization1: assignment.OrganizCode1,
+      Organization2: assignment.OrganizCode2,
+      Organization3: assignment.OrganizCode3,
+      Organization4 : assignment.OrganizCode4,
+      FreeSalary1: contract.SalaryMonth1,
+      FreeSalary2: contract.SalaryMonth2,
+      FreeSalary3: contract.SalaryMonth3,
+      FreeSalary4: contract.SalaryMonth4,
+      FreeSalary5: contract.SalaryMonth5,
+      FreeCombo1: "ZZZ",
+      FreeCombo2: "ZZZ",
+      FreeCombo3: "ZZZ",
+      FreeCombo4: "ZZZ",
+      FreeDate1: "01/01/1900",
+      FreeDate2: "01/01/1900",
+      FreeDate3: "01/01/1900",
+      FreeDate4: "01/01/1900",
       FreeBool1: true,
       FreeBool2: true,
       FreeBool3: true,
       FreeBool4: true,
       //ResourceId: "",
       EntryDate: date,
-      BirthDate: "",
-      SocialNumber: "",
+      BirthDate: civility.BirthDate,
+      SocialNumber: civility.SocialNumber,
       CreateContract: false
     }
   
@@ -428,4 +386,44 @@ function createEmployee(employee,establishment,date){
 
 }
 
+function createRIB(){
+
+  const dataRIB = readSessionStorage("RIB");
+
+  const newRib =
+    {
+      Name : dataRIB.BankName,
+      City: dataRIB.City,
+      IBAN: dataRIB.IbanCode,
+      BIC: dataRIB.BICCode
+    }
+
+    return newRib;
+  
+}
+
+/**
+ * 
+ * @param {string} key 
+ * @returns 
+ */
+function readSessionStorage(key){
+  
+  let dataLinea = sessionStorage.getItem(key);
+  let dataJson = JSON.parse(dataLinea);
+  return dataJson;  
+}
+
+/**
+* La fonction créer dans le local storage une no
+* @param {string} 
+* @param {object} 
+* @returns 
+*/
+
+function writeSessionStorage(key,data){
+  let dataLinea = JSON.stringify(data);
+  sessionStorage.setItem(key,dataLinea)
+
+}
 
