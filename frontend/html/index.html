@@ -37,43 +37,49 @@
         
         <div class = "conteneur__select">
 
-            <div class="conteneur__select__items conteneur__select__display--block">
+            <div class="conteneur__select__items">
 
-                <span>Etape Dossier In</span>
-                <select name="" id=""></select>
-                <button>Société source</button>
-
-            </div>
-
-
-            <div class="conteneur__select__display--none">
-
-                <span>Etape Dossier Out</span>
-                <select name="" id=""></select>
-                <button>Société de destination</button>
-
-
-            </div>
-
-            <div class="conteneur__select__display--none">
-
-                <span>Etape Dossier Employee</span>
-                <select name="" id=""></select>
-                <button>Salarié</button>
-
-
-            </div>
-
-            <div class="conteneur__select__display--none">
-
-                <span>Etape Dossier Establishment</span>
-                <select name="" id=""></select>
-                <button>Choisir un établissement</button>
-
+                <label>Choisir un dossier</label>
+                <select name="foldersIn" id="foldersIn"></select>
+                <button class = "button" id="buttonFoldersIn" >Société source</button>
 
             </div>
 
 
+            <div class="conteneur__select--display--none">
+
+                <label>Etape Dossier Out</label>
+                <select name="" id="foldersOut"></select>
+                <button class = "button">Société de destination</button>
+
+
+            </div>
+
+            <div class="conteneur__select--display--none">
+
+                <label>Etape Dossier Employee</label>
+                <select name="" id="employees" multiple></select>
+                <button class ="button">Salarié</button>
+
+
+            </div>
+
+            <div class="conteneur__select--display--none">
+
+                <label>Etape Dossier Establishment</label>
+                <select name="" id="establishments"></select>
+                <button class = "button">Choisir un établissement</button>
+
+            </div>
+
+
+            <div class="conteneur__select--display--none">
+
+                <label>Date de transfert</label>
+                <input type="date" id = "date">
+                <button class="button">Choisir une date de transfert</button>
+
+            </div>
 
         </div>
 
@@ -90,8 +96,10 @@
 
             <div class = "conteneur__options__column">
                 <ul>
-                    <li>Société A</li>
-                    <li>Matricule</li>
+                    <li class = "conteneur__options__column__option" id = "optionFolderIn">Société A</li>
+                    <li id = "optionEmployee">Matricule</li>
+                    <li id = "optionEstablishment">Matricule</li>
+
                     <li>Analytique</li>
 
                 </ul>
@@ -100,7 +108,7 @@
 
             <div class = "conteneur__options__column">
                 <ul>
-                    <li>Société B</li>
+                    <li id = "optionFolderOut">Société B</li>
                     <li>Matricule</li>
                     <li>Analytique</li>
 

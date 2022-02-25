@@ -1,4 +1,5 @@
 const urlServer = "http://localhost:3000"
+const urlAPI = ["/session","v1/Folder/ListFolders","v1/Employee/OData/Identity?folderId=","/v1/Establishment/OData/Establishment?folderId="]
 const button = document.getElementsByClassName("button")
 
 
@@ -6,7 +7,7 @@ function startSession (){
 
   button[0].addEventListener("click", () => {
 
-    fetch (urlServer+"/session")
+    fetch (urlServer+urlAPI[0])
     .then((res)=>{
       if (res.ok) {
         return res.json();
@@ -38,7 +39,7 @@ function getCredentials (){
 
 function getFolderIn (){
 
-  const folderIn = document.getElementById("folderIn").value;
+  const folderIn = document.getElementById("foldersIn").value;
   const folderInRename = renameFolder(folderIn)
   return folderInRename;
 }
@@ -46,15 +47,13 @@ function getFolderIn (){
 
 function getFolderOut (){
 
-  const folderOut = document.getElementById("folderOut").value;
+  const folderOut = document.getElementById("foldersOut").value;
   const folderOutRename = renameFolder(folderOut)
   return folderOutRename;
 
 }
 
-/**
- * Etape 1
- */
+//Connexion à l'aide du formulaire
 
 function connexion (){
 
@@ -62,11 +61,11 @@ function connexion (){
 
         event.preventDefault();
 
-        getData("https://y2cbrh-ondemand.cegid.com//CegidRHWebApi/v1/Folder/ListFolders")
+        getData(urlAPI[1])
 
         .then( (dataFolders) => {
 
-          writeFolders("foldersIn",dataFolders)
+          writeFolders(dataFolders)
           buttonFoldersIn();
         
         })
@@ -82,44 +81,148 @@ function connexion (){
 
 connexion();
 
+//Ecriture des dossiers
+
 /**
  * 
- * @param {string} description indiquer la valeur à écrire sur le bouton
- * @param {string} stepId Id de la liste déroulante
+ * @param {data} stepId Id de la liste déroulante
  */
 
-function writeSelect(description,stepId){
+function writeFolders(datas){
 
-  const divSelect = document.getElementsByClassName("conteneur__select");
-  const divStep = document.createElement("div");
-  divStep.classList.add("conteneur__select__items");
-  divSelect[0].appendChild(divStep);
-  const select = document.createElement("select");
-  const button = document.createElement("button");
-  button.setAttribute("id","button__"+stepId);
-  button.textContent = description
-  select.setAttribute("id",stepId);
-  divStep.appendChild(select)
-  divStep.appendChild(button);
+  const foldersJSON = JSON.parse(datas);
+  const foldersIn = document.getElementById("foldersIn");
+  const foldersOut = document.getElementById("foldersOut");
 
+  for (folder of foldersJSON){
+
+    const option = document.createElement("option");
+    option.textContent = folder.FolderId
+
+    foldersIn.appendChild(option);
+  }
+
+  for (folder of foldersJSON){
+
+    const option = document.createElement("option");
+    option.textContent = folder.FolderId
+
+    foldersOut.appendChild(option);
+  }
+ 
 }
-/**
- * 
- * @param {JSON} data 
- */
 
-function buttonFolders (){
+function buttonFoldersIn(){
 
-  const button = document.getElementById("button__foldersIn");
-  button.addEventListener("click", () => {
+  button[2].addEventListener("click", () =>{
 
-    const folderIn = document.getElementById("foldersIn").value;
-    const folderInRename = renameFolder(folderIn);
-    sessionStorage.setItem("folderIn",folderInRename);
+    const foldersIn = document.getElementsByClassName("conteneur__select__items");
 
+    const saveFolderIn = document.getElementById("foldersIn").value;
+    const writeSaveFolderIn = document.getElementById("optionFolderIn");
+    writeSaveFolderIn.textContent = saveFolderIn;
+
+    const foldersOut = document.getElementsByClassName("conteneur__select--display--none");
+
+    foldersOut[0].classList.replace("conteneur__select--display--none","conteneur__select__items");
+    foldersIn[0].classList.replace("conteneur__select__items","conteneur__select--display--none");
 
   })
 }
+
+buttonFoldersIn()
+
+function buttonFoldersOut(){
+
+  button[3].addEventListener("click", ()=> {
+
+    const foldersOut = document.getElementsByClassName("conteneur__select__items");
+
+    const saveFolderOut = document.getElementById("foldersIn").value;
+    const writeSaveFolderOut = document.getElementById("optionFolderOut");
+    writeSaveFolderOut.textContent = saveFolderOut;
+
+    const employees = document.getElementsByClassName("conteneur__select--display--none");
+
+    employees[1].classList.replace("conteneur__select--display--none","conteneur__select__items");
+    foldersOut[0].classList.replace("conteneur__select__items","conteneur__select--display--none");
+
+    getEmployees();
+
+
+  })
+
+}
+
+buttonFoldersOut();
+    //récupération des salariés
+
+function buttonEmployees (){
+
+  button[4].addEventListener("click", () => {
+
+    const employees= document.getElementsByClassName("conteneur__select__items");
+    const saveEmployee = document.getElementById("optionEmployee");
+    saveEmployee.textContent = getMatricule();
+
+    const establishments = document.getElementsByClassName("conteneur__select--display--none");
+    establishments[2].classList.replace("conteneur__select--display--none","conteneur__select__items");
+    employees[0].classList.replace("conteneur__select__items","conteneur__select--display--none");
+
+    getEstablishments()
+
+  })
+}
+
+buttonEmployees();
+
+function getEmployees(){
+    getData(urlAPI[2]+getFolderIn())
+
+    .then((employees)=> {
+      
+      writeEmployees(employees);
+    })
+    .catch((error) => {
+      console.error(error);
+    })
+
+}
+
+function buttonEstablishment(){
+
+  button[5].addEventListener("click", () => {
+
+    const establishment= document.getElementsByClassName("conteneur__select__items");
+    const saveEstablishment = document.getElementById("establishments").value;
+    const writeEstablishment = document.getElementById("optionEstablishment");
+    writeEstablishment.textContent = saveEstablishment;
+
+    const date = document.getElementsByClassName("conteneur__select--display--none");
+    date[3].classList.replace("conteneur__select--display--none","conteneur__select__items");
+    establishment[0].classList.replace("conteneur__select__items","conteneur__select--display--none");
+
+  })
+}
+
+buttonEstablishment();
+
+
+function getEstablishments(){
+
+  getData(urlAPI[3]+getFolderIn())
+
+  .then((establishments) => {
+
+    writeEstablishments(establishments)
+
+  })
+
+  .catch((error) => {
+    console.error(error);
+  })
+}
+
 
 /**
  * 
@@ -166,24 +269,6 @@ function getData(patch){
     
 }
 
-/**
- * Voir pour déplacer la logique sur le backend
- * Fonction pour créer un salarié
- * Etape 1 création d'un objet avec les éléments de la séléction
- * Etape 2 getIdentity pour obtenir les informations
- * Etape 3 Modification des données de du retour de getIdentity pour adapter au post Employee retour du matricule
- * Etape 4 Mise à jour des informations manquantes 
- * Etape 5 Récupération du RIB + création dans la nouvelle société
- * Etape 6 Si analytique récupération
- * Etape 7 Si zones libres identiques reprise
- * @returns 
- */
-
-
-/**
- * 
- * @param {JSON} Employees 
- */
 function writeEmployees(employees) {
 
   const employeesJSON = JSON.parse(employees);
@@ -206,14 +291,12 @@ function writeEmployees(employees) {
 function writeEstablishments (establishments){
 
   const establishmentsJSON = JSON.parse(establishments);
-  const selectEstablishment = document.getElementById("establisments");
-  console.log(selectEstablishment)
+  const selectEstablishment = document.getElementById("establishments");
 
   for (establishment of establishmentsJSON.Items){
 
     let optionEstablishment = document.createElement("option");
     optionEstablishment.textContent = establishment.Establishment+' '+establishment.EstablishmentLabel;
-    console.log(optionEstablishment);
     selectEstablishment.appendChild(optionEstablishment);
   }
 
@@ -237,39 +320,6 @@ function renameFolder(folder){
 
 
 
-function postEmployee (patch,data){
-
-
-  paramConnexion = {
-    login : getCredentials(),
-    url : patch,
-    employee : data
-  }
-
-    return new Promise ((resolve, reject) => {
-      fetch(urlServer+"/apiCegid/post",{
-      method: "POST",
-      headers:{
-        'Accept':'application/json',
-        'Content-Type': 'application/json'
-      ,
-     },
-       body: JSON.stringify(paramConnexion)
- 
-     })
-     .then (function (res){
-       if (res.ok){
-         resolve(res.json());
-       }    
-     })
-
-     
-     .catch(function(err){
-       res.status;
-     }); 
-    })
-
-}
 
 /**
  * 
@@ -324,83 +374,6 @@ function getDate(){
   return date;
 }
 
-/**
- * 
- * @param {string} code etablissement
- * @param {date} date du transfert
- * @return un employé au format du post
- */
-
-function createEmployee(establishment,date){
-
-  const identity = readSessionStorage("Identity");
-  const civility = readSessionStorage("Civility");
-  const assignment = readSessionStorage("Assignment");
-  const contract = readSessionStorage("Contract")
-
-  const newEmployee = {
-
-      Name: identity.Name,
-      MaidenName: "",
-      FirstName: identity.FirstName,
-      Civility: identity.Civility,
-      Sex: identity.Gender,
-      Address: identity.Adress1,
-      Address2: identity.Adress2,
-      Address3: identity.Adress3,
-      PostalCode: identity.PostCode,
-      City: identity.City,
-      Country: identity.Country,
-      Establishment: establishment,
-      //Gestion automatique"EmployeeId": "string",
-      StatisticalCode: assignment.StatCode,
-      Organization1: assignment.OrganizCode1,
-      Organization2: assignment.OrganizCode2,
-      Organization3: assignment.OrganizCode3,
-      Organization4 : assignment.OrganizCode4,
-      FreeSalary1: contract.SalaryMonth1,
-      FreeSalary2: contract.SalaryMonth2,
-      FreeSalary3: contract.SalaryMonth3,
-      FreeSalary4: contract.SalaryMonth4,
-      FreeSalary5: contract.SalaryMonth5,
-      FreeCombo1: "ZZZ",
-      FreeCombo2: "ZZZ",
-      FreeCombo3: "ZZZ",
-      FreeCombo4: "ZZZ",
-      FreeDate1: "01/01/1900",
-      FreeDate2: "01/01/1900",
-      FreeDate3: "01/01/1900",
-      FreeDate4: "01/01/1900",
-      FreeBool1: true,
-      FreeBool2: true,
-      FreeBool3: true,
-      FreeBool4: true,
-      //ResourceId: "",
-      EntryDate: date,
-      BirthDate: civility.BirthDate,
-      SocialNumber: civility.SocialNumber,
-      CreateContract: false
-    }
-  
-    return newEmployee
-
-}
-
-function createRIB(){
-
-  const dataRIB = readSessionStorage("RIB");
-
-  const newRib =
-    {
-      Name : dataRIB.BankName,
-      City: dataRIB.City,
-      IBAN: dataRIB.IbanCode,
-      BIC: dataRIB.BICCode
-    }
-
-    return newRib;
-  
-}
 
 /**
  * 

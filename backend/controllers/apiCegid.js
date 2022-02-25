@@ -1,18 +1,21 @@
 const https = require('https');
+const env = require('dotenv').config();
+
 const { stringify } = require('querystring');
 
 exports.getDataAPI = (req, res , next)  =>{
 
   const password = Buffer.from(req.body.login).toString('base64');
+  const url =process.env.URLAPI+req.body.url
 
-    const options = {        
+    const options = {
         port: 443,
         method: 'GET',
         headers:{
           Authorization: 'Basic '+password//+req.body.login
      }
   };
-  https.get(req.body.url,options, (resp) => {
+  https.get(url,options, (resp) => {
   let data = '';
 
 
