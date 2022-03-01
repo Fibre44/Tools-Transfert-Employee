@@ -3,10 +3,10 @@ const express = require('express');
 const app = express();
 const env = require('dotenv').config();
 
-
 const apiCegidRoutes = require('./routes/apiCegid');
 const sessionRoutes = require('./routes/session');
 const optionRoutes = require('./routes/option');
+const transertRoutes = require('./routes/transfert');
 
 mongoose.connect('mongodb+srv://'+process.env.DB_USER+':'+process.env.DB_PASS+'@cluster0.wbsym.mongodb.net/'+process.env.DB_HOST+'?retryWrites=true&w=majority',
   { useNewUrlParser: true,
@@ -27,5 +27,6 @@ app.use(express.json());
 app.use('/apiCegid',apiCegidRoutes);
 app.use('/session',sessionRoutes);
 app.use('/option',optionRoutes);
+app.use('/transfert',transertRoutes);
 
 module.exports = app;

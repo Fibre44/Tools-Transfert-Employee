@@ -1,5 +1,5 @@
 const urlServer = "http://localhost:3000"
-const urlAPI = ["/session","v1/Folder/ListFolders","v1/Employee/OData/Identity?folderId=","/v1/Establishment/OData/Establishment?folderId="]
+const urlAPI = ["v1/Folder/ListFolders","v1/Employee/OData/Identity?folderId=","/v1/Establishment/OData/Establishment?folderId="]
 const button = document.getElementsByClassName("button")
 
 
@@ -7,7 +7,7 @@ function startSession (){
 
   button[0].addEventListener("click", () => {
 
-    fetch (urlServer+urlAPI[0])
+    fetch (urlServer+"/session")
     .then((res)=>{
       if (res.ok) {
         return res.json();
@@ -17,7 +17,7 @@ function startSession (){
 
       sessionStorage.setItem("session",session.idSession);
 
-      document.getElementsByClassName("header__session")[0].textContent = "Session en cours "+session.idSession;
+      document.getElementsByClassName("header__session")[0].textContent = "Session en cours :"+session.idSession;
       
     })
   })
@@ -61,7 +61,7 @@ function connexion (){
 
         event.preventDefault();
 
-        getData(urlAPI[1])
+        getData(urlAPI[0])
 
         .then( (dataFolders) => {
 
@@ -177,7 +177,7 @@ function buttonEmployees (){
 buttonEmployees();
 
 function getEmployees(){
-    getData(urlAPI[2]+getFolderIn())
+    getData(urlAPI[1]+getFolderIn())
 
     .then((employees)=> {
       
@@ -207,10 +207,143 @@ function buttonEstablishment(){
 
 buttonEstablishment();
 
+function buttonValidationTransfert (){
+
+  button[6].addEventListener("click", () => {
+
+    paramConnexion = {
+      login : getCredentials(),
+      options : getOptions()
+    }
+
+      transfertIdentity()
+      transfertCivilRegistration();
+      transfertRib();
+      //transertMigration();
+      
+    })
+}
+
+buttonValidationTransfert();
+
+function transfertIdentity(){
+
+    fetch(urlServer+"/transfert/identity",{
+    method: "POST",
+    headers:{
+      'Accept':'application/json',
+      'Content-Type': 'application/json'
+    ,
+   },
+     body: JSON.stringify(paramConnexion)
+
+   })
+   .then (function (res){
+     if (res.ok){
+       return(res.json());
+     }    
+   })
+
+   .then((res)=>{
+
+    resolve(res);
+   })
+   
+   .catch(function(err){
+     console.error("Le serveur ne répond pas ",err)
+   }); 
+  
+  
+}
+
+function transfertCivilRegistration(){
+  fetch(urlServer+"/transfert/civilregistration",{
+    method: "POST",
+    headers:{
+      'Accept':'application/json',
+      'Content-Type': 'application/json'
+    ,
+   },
+     body: JSON.stringify(paramConnexion)
+
+   })
+   .then (function (res){
+     if (res.ok){
+       return(res.json());
+     }    
+   })
+
+   .then((res)=>{
+
+    resolve(res);
+   })
+   
+   .catch(function(err){
+     console.error("Le serveur ne répond pas ",err)
+   }); 
+}
+
+function transfertRib(){
+
+  fetch(urlServer+"/transfert/rib",{
+    method: "POST",
+    headers:{
+      'Accept':'application/json',
+      'Content-Type': 'application/json'
+    ,
+   },
+     body: JSON.stringify(paramConnexion)
+
+   })
+   .then (function (res){
+     if (res.ok){
+       return(res.json());
+     }    
+   })
+
+   .then((res)=>{
+
+    resolve(res);
+   })
+   
+   .catch(function(err){
+     console.error("Le serveur ne répond pas ",err)
+   }); 
+}
+
+function transertMigration(){
+
+  fetch(urlServer+"/transfert/migration",{
+    method: "POST",
+    headers:{
+      'Accept':'application/json',
+      'Content-Type': 'application/json'
+    ,
+   },
+     body: JSON.stringify(paramConnexion)
+
+   })
+   .then (function (res){
+     if (res.ok){
+       return(res.json());
+     }    
+   })
+
+   .then((res)=>{
+
+    resolve(res);
+   })
+   
+   .catch(function(err){
+     console.error("Le serveur ne répond pas ",err)
+   }); 
+
+}
+
 
 function getEstablishments(){
 
-  getData(urlAPI[3]+getFolderIn())
+  getData(urlAPI[2]+getFolderIn())
 
   .then((establishments) => {
 
@@ -319,14 +452,12 @@ function renameFolder(folder){
 }
 
 
-
-
 /**
  * 
  * @returns un objet avec les éléments selectionnés par l'utilisateur
  */
 
-function migrationOptions(){
+function getOptions(){
 
   options = {
 
@@ -334,12 +465,21 @@ function migrationOptions(){
     folderOut : getFolderOut(),
     matricule : getMatricule(),
     establishment : getEstablishment(),
-    date : getDate()
+    date : getDate(),
+    sessionId : getSession()
 
   }
 
   return (options)
 
+}
+
+function getSession (){
+
+  const session = document.getElementsByClassName("header__session");
+  const sessionValue = session[0].textContent;
+  const sessionSplit = sessionValue.split(':');
+  return sessionSplit[1];
 }
 
 /**
@@ -361,7 +501,7 @@ function getMatricule(){
 
 function getEstablishment(){
 
-  const establishmentComplet = document.getElementById("establisments").value;
+  const establishmentComplet = document.getElementById("establishments").value;
   const establishmentSplit = establishmentComplet.split(" ");
   establishment = establishmentSplit[0];
 

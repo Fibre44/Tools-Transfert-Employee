@@ -71,8 +71,6 @@ exports.postApi = (req, res , next ) =>{
     
 
     reqPost.end()
-
-    
     
 }
 
