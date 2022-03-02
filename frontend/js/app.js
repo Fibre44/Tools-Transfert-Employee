@@ -217,10 +217,17 @@ function buttonValidationTransfert (){
     }
 
       transfertIdentity()
-      transfertCivilRegistration();
-      transfertRib();
-      //transertMigration();
-      
+      .then(()=>{
+        transfertCivilRegistration();
+        transfertRib();
+  
+      })
+
+      const date= document.getElementsByClassName("conteneur__select__items");
+      const confirmation = document.getElementsByClassName("conteneur__select--display--none");
+      confirmation[4].classList.replace("conteneur__select--display--none","conteneur__select__items");
+      date[0].classList.replace("conteneur__select__items","conteneur__select--display--none");
+
     })
 }
 
@@ -228,6 +235,7 @@ buttonValidationTransfert();
 
 function transfertIdentity(){
 
+    return new Promise (function(resolve, reject) {
     fetch(urlServer+"/transfert/identity",{
     method: "POST",
     headers:{
@@ -240,7 +248,7 @@ function transfertIdentity(){
    })
    .then (function (res){
      if (res.ok){
-       return(res.json());
+       resolve(res.json());
      }    
    })
 
@@ -252,9 +260,24 @@ function transfertIdentity(){
    .catch(function(err){
      console.error("Le serveur ne répond pas ",err)
    }); 
-  
+  })
   
 }
+
+function buttonConfirmTransfert (){
+  button[7].addEventListener("click", () => {
+
+    paramConnexion = {
+      login : getCredentials(),
+      options : getOptions()
+    }
+
+     transertMigration();
+    })
+}
+
+buttonConfirmTransfert();
+
 
 function transfertCivilRegistration(){
   fetch(urlServer+"/transfert/civilregistration",{

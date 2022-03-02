@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const identitySchema = mongoose.Schema({
 
     sessionId : {type : String, required : true, unique: true},
+    EmployeeId : {type : String, required : true},
     Name : {type : String, required : false},
     FirstName : {type : String, required : false},
     EntryDate : {type : Date, required : false},
@@ -13,7 +14,7 @@ const identitySchema = mongoose.Schema({
     Gender : {type : String, required : false},
     GenderLabel : {type : String, required : false},
     BirthName : {type : Date, required : false},
-    Adress1 : {type : String, required : false},
+    Adress : {type : String, required : false},
     Adress2 : {type : String, required : false},
     Adress3 : {type : String, required : false},
     PostCode : {type : String, required : false},
@@ -26,7 +27,7 @@ const identitySchema = mongoose.Schema({
     Email : {type : String, required : false},
     Establishment : {type : String, required : false},
     EstablishmentLabel : {type : String, required : false},
-
+    Sex : {type : String, required : true}
 
 })
 
