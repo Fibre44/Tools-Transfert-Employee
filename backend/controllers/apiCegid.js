@@ -1,8 +1,6 @@
 const https = require('https');
 const env = require('dotenv').config();
 
-const { stringify } = require('querystring');
-
 exports.getDataAPI = (req, res , next)  =>{
 
   const password = Buffer.from(req.body.login).toString('base64');
